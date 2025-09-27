@@ -1,28 +1,29 @@
+# settings.py
+
 import os
 from pathlib import Path
-import environ # 1. Import environ
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2. Initialize environ and read the .env file
+# 1. Initialize environ and read the .env file
 env = environ.Env(
     # Set casting default for SECRET_KEY to str
-    DEBUG=(bool, False) 
+    DEBUG=(bool, True) 
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# 3. Use environment variables for sensitive data
+# 2. Use environment variables for sensitive data
 SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG') # Read DEBUG from .env, defaults to False
+DEBUG = env('DEBUG') 
 
-ALLOWED_HOSTS = []
-# ... other standard settings ...
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] # It's good practice to set this even if DEBUG=True
 
-# 4. INSTALLED_APPS
+# Application definition
+
 INSTALLED_APPS = [
     # Django Defaults
     'django.contrib.admin',
@@ -33,34 +34,32 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third-party Apps
-    'rest_framework',        # Django REST Framework
-    'corsheaders',           # CORS Headers
-    'drf_yasg',              # Swagger/OpenAPI
+    'rest_framework',        
+    'corsheaders',           
+    'drf_yasg',              
 
     # Local Apps
-    'listings',              # The app you created
+    'listings',              
 ]
-
-# ... middleware and other settings ...
-# In settings.py
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # --- START REQUIRED ADMIN MIDDLEWARE ---
-    'django.contrib.sessions.middleware.SessionMiddleware', # E410 (Order is important!)
-    'django.contrib.auth.middleware.AuthenticationMiddleware', # E408
-    'django.contrib.messages.middleware.MessageMiddleware', # E409
-    # --- END REQUIRED ADMIN MIDDLEWARE ---
+    # CORS must be near the top
+    'corsheaders.middleware.CorsMiddleware', 
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    # ... other middleware ...
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-# In settings.py
+
+ROOT_URLCONF = 'alx_travel_app.urls' # Set the required ROOT_URLCONF
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates', # E403
-        'DIRS': [], # You can add your main template directory here later
+        'BACKEND': 'django.template.backends.django.DjangoTemplates', 
+        'DIRS': [], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -73,7 +72,9 @@ TEMPLATES = [
     },
 ]
 
-# 5. Database Configuration (MySQL)
+WSGI_APPLICATION = 'alx_travel_app.wsgi.application' # Default WSGI application definition
+
+# Database Configuration (MySQL)
 DATABASES = {
     'default': env.db(
         'DATABASE_URL',
@@ -81,7 +82,39 @@ DATABASES = {
     )
 }
 
-# 6. CORS Settings
+# Password validation
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# Internationalization
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# The fix for the ImproperlyConfigured error is here:
+STATIC_URL = '/static/' 
+
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS Settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -89,14 +122,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True 
 
-# 7. DRF Settings
+# DRF Settings
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ]
 }
-
-# ... other standard settings (LANGUAGE_CODE, TIME_ZONE, etc.) ...
-
-# Static files (CSS, JavaScript, Images)
-# ...
